@@ -37,6 +37,7 @@ namespace TrackStudio
         //Menus
         private MenuItem SaveMenu;
         private MenuItem SaveAsMenu;
+        private MenuItem SaveAllMenu;
         private MenuItem SaveProjectMenu;
         private MenuItem SaveAsProjectMenu;
         //Debug
@@ -239,8 +240,17 @@ namespace TrackStudio
             {
                 Workspace.ActiveWorkspace.SaveFileWithDialog();
             }) { Shortcut = "Ctrl+Alt+S" };
+            SaveAllMenu = new MenuItem($"SAVE_ALL", IconManager.SAVE_ICON, () =>
+            {
+                foreach (var workspace in Workspaces)
+                {
+                    workspace.SaveFileData(true);
+                }
+            })
+            { Shortcut = "Ctrl+Shift+S" };
             fileMenu.MenuItems.Add(SaveMenu);
             fileMenu.MenuItems.Add(SaveAsMenu);
+            fileMenu.MenuItems.Add(SaveAllMenu);
             fileMenu.MenuItems.Add(new MenuItem("")); //splitter
             fileMenu.MenuItems.Add(new MenuItem($"OPEN_PROJECT", IconManager.PROJECT_ICON, OpenProject));
             fileMenu.MenuItems.Add(new MenuItem($"RECENT_PROJECTS", ' ') { RenderItems = LoadRecentProjects });
@@ -283,6 +293,7 @@ namespace TrackStudio
 
             SaveMenu.Enabled = false;
             SaveAsMenu.Enabled = false;
+            SaveAllMenu.Enabled = false;
             SaveProjectMenu.Enabled = false;
             SaveAsProjectMenu.Enabled = false;
         }
@@ -626,6 +637,7 @@ namespace TrackStudio
             bool canSave = Workspace.ActiveWorkspace != null;
             SaveMenu.Enabled = canSave;
             SaveAsMenu.Enabled = canSave;
+            SaveAllMenu.Enabled = canSave;
             // SaveProjectMenu.Enabled = canSave;
             //  SaveAsProjectMenu.Enabled = canSave;
             UpdateDockLayout = true;
@@ -679,6 +691,15 @@ namespace TrackStudio
             //Make sure the key cannot be repeated when held down
             if (!e.IsRepeat)
             {
+                //Save As shortcut
+                if (state.KeyShift && state.KeyCtrl && e.Key == Key.S)
+                {
+                    foreach (var workspace in Workspaces)
+                    {
+                        workspace.SaveFileData(true);
+                    }
+                    return;
+                }
                 //Save As shortcut
                 if (state.KeyAlt && state.KeyCtrl && e.Key == Key.S)
                 {

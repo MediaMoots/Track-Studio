@@ -121,6 +121,7 @@ OPEN - Open
 RECENT - Recent
 SAVE - Save
 SAVE_AS - Save As
+SAVE_ALL - Save All
 CANCEL - Cancel
 OPEN_PROJECT - Open Project
 RECENT_PROJECTS - Recent Projects
