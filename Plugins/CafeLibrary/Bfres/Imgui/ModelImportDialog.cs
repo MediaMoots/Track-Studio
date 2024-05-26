@@ -75,6 +75,8 @@ namespace CafeLibrary
                     var fshp = (FSHP)fmdl.Meshes.FirstOrDefault(x => x.Name == mesh.Name);
                     foreach (var att in fshp.VertexBuffer.Attributes.Values)
                         meshSettings.AttributeLayout.Add(new ModelImportSettings.AttributeInfo(att.Name, att.BufferIndex));
+
+                    meshSettings.BoneIndex = (ushort)fshp.BoneIndex;
                 }
 
                 // Select Similar Materials
