@@ -30,7 +30,7 @@ namespace CafeLibrary
         public bool RotateNeg90 = false;
         public bool EnableLODs = false;
         public bool EnableSubMesh = false;
-        public bool ImportBones = false;
+        public bool ImportBones = true;
 
         public bool RecalculateNormals = false;
         public bool OverrideVertexColors = false;

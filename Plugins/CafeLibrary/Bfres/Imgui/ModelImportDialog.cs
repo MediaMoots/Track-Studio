@@ -53,6 +53,10 @@ namespace CafeLibrary
                 meshSettings.MaterialName = "";
                 meshSettings.MeshSkinCount = mesh.Vertices.Max(x => x.Envelope.Weights.Count);
                 //meshSettings.DataSkinCount = meshSettings.MeshSkinCount;
+                if (meshSettings.MeshSkinCount == 16)
+                {
+                    meshSettings.UseCustomDataSkinCount = true;
+                }
                 meshSettings.DataSkinCount = 8; // Static to 8
                 meshSettings.Normal.Enable = mesh.HasNormals;
                 meshSettings.UVs.Enable = mesh.HasUVSet(0);
