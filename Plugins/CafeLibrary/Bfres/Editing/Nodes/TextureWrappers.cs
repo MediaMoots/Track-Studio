@@ -511,6 +511,15 @@ namespace CafeLibrary
             if (BntxFile.Textures == null)
                 BntxFile.Textures = new List<Texture>();
 
+            if (BntxFile.Textures.Count == 0)
+            {
+                if (ResFile.ExternalFiles.ContainsKey("textures.bntx"))
+                {
+                    ResFile.ExternalFiles.RemoveKey("textures.bntx");
+                }
+                return;
+            }
+
             BntxFile.Textures.Clear();
             BntxFile.TextureDict.Clear();
             foreach (BfresLibrary.Switch.SwitchTexture texture in ResFile.Textures.Values)

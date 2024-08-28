@@ -94,9 +94,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Lib\Languages\English\TurboStudio.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="Lib\Shaders\KCL\CollisionDefault.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -224,6 +224,8 @@ namespace CafeLibrary
 
             MaterialFolder.ContextMenus.Add(new MenuItemModel("Add Material", AddMaterialDialog));
             MaterialFolder.ContextMenus.Add(new MenuItemModel(""));
+            MaterialFolder.ContextMenus.Add(new MenuItemModel("Replace From Folder", ReplaceMaterialsFromFolder));
+            MaterialFolder.ContextMenus.Add(new MenuItemModel(""));
             MaterialFolder.ContextMenus.Add(new MenuItemModel("Export All - JSON", ExportMaterialsToJsonDialog));
             MaterialFolder.ContextMenus.Add(new MenuItemModel("Export All - BFMAT", ExportMaterialsToBfmatDialog));
             MaterialFolder.ContextMenus.Add(new MenuItemModel("Export All - ZIP", ExportMaterialsToZipDialog));
@@ -328,6 +330,35 @@ namespace CafeLibrary
                     BfresWrapper.ModelFolder.RemoveModel(this);
                 }),
             };
+        }
+
+        private void ReplaceMaterialsFromFolder()
+        {
+            var dlg = new ImguiFolderDialog();
+            dlg.Title = "Pick Folder";
+
+            if (dlg.ShowDialog())
+            {
+                foreach (string file in Directory.GetFiles(dlg.SelectedPath, "*.json", SearchOption.TopDirectoryOnly))
+                {
+                    foreach (var material in Materials)
+                    {
+                        if (material.Name != Path.GetFileNameWithoutExtension(file))
+                        {
+                            continue;
+                        }
+
+                        FMAT? fmat = material as FMAT;
+                        if (fmat == null)
+                        {
+                            continue;
+                        }
+
+                        fmat.Material.Import(file, ResFile);
+                        fmat.Replace(fmat.Material);
+                    }
+                }
+            }
         }
 
         private void ExportMaterialsToJsonDialog()
