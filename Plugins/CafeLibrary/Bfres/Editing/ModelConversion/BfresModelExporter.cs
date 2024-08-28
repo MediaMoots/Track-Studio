@@ -150,11 +150,8 @@ namespace CafeLibrary.ModelConversion
                             var bone = skeleton.BreathFirstOrder()[index];
                             vertex.Position = Vector3.Transform(vertex.Position, bone.WorldTransform);
                             vertex.Normal = Vector3.Transform(vertex.Normal, bone.WorldTransform);
+                            vertex.Tangent = Vector3.Transform(vertex.Tangent, bone.WorldTransform);
                         }
-                        var bone = skeleton.BreathFirstOrder()[index];
-                        vertex.Position = Vector3.Transform(vertex.Position, bone.WorldTransform);
-                        vertex.Normal = Vector3.Transform(vertex.Normal, bone.WorldTransform);
-                        vertex.Tangent = Vector3.Transform(vertex.Tangent, bone.WorldTransform);
                     }
                 }
             }
