@@ -576,6 +576,7 @@ namespace CafeLibrary
                 if (ResFile.Name.StartsWith("course_model"))
                 {
                     useDialog = false;
+                    settings.ImportBones = true;
                 }
 
                 if (useDialog)
@@ -1122,7 +1123,7 @@ namespace CafeLibrary
             if (index == -1)
                 return;
 
-            foreach (var mat in GetSelectedMaterials())
+            foreach (var mat in ModelWrapper.GetSelectedMaterials())
             {
                 mat.TextureMaps[index].Name = name;
                 mat.ReloadTextureMap(index);
@@ -1134,7 +1135,7 @@ namespace CafeLibrary
         public void BatchEditRenderInfo(RenderInfo renderInfo)
         {
             //Batch edit material render info
-            foreach (var mat in GetSelectedMaterials())
+            foreach (var mat in ModelWrapper.GetSelectedMaterials())
             {
                 if (mat.Material.RenderInfos.ContainsKey(renderInfo.Name))
                 {
@@ -1152,7 +1153,7 @@ namespace CafeLibrary
         public void BatchEditParams(ShaderParam param)
         {
             //Batch edit material params
-            foreach (var mat in GetSelectedMaterials())
+            foreach (var mat in ModelWrapper.GetSelectedMaterials())
             {
                 if (mat.ShaderParams.ContainsKey(param.Name) && mat.ShaderParams[param.Name].Type == param.Type)
                     mat.ShaderParams[param.Name].DataValue = param.DataValue;
@@ -1840,7 +1841,7 @@ namespace CafeLibrary
             {
                 try
                 {
-                    foreach (var mat in GetSelectedMaterials())
+                    foreach (var mat in ModelWrapper.GetSelectedMaterials())
                     {
                         if (dlg.FilePath.EndsWith(".zip"))
                             mat.LoadPreset(dlg.FilePath, true);

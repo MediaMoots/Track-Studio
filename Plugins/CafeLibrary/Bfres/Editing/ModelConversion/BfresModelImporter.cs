@@ -135,6 +135,18 @@ namespace CafeLibrary.ModelConversion
 
                 MapStudio.UI.ProcessLoading.Instance.Update(50, 100, $"Loading bfres bones.");
 
+                //temp fix for custom tracks having root breaking things
+                //Custom tracks need custom bones, but bones cannot transform most materials due to not being used in shaders
+                //Here we apply the root to be identify, and inverse all the children by the matrix
+                var bone_list = model.Skeleton.BreathFirstOrder();
+                foreach (var root in bone_list.Where(x => x.Parent == null))
+                {
+                    foreach (var child in root.Children)
+                        child.WorldTransform *= root.WorldTransform;
+
+                    root.WorldTransform = Matrix4x4.Identity;
+                }
+
                 foreach (var bone in model.Skeleton.BreathFirstOrder())
                 {
                     if (string.IsNullOrEmpty(bone.Name))
@@ -543,16 +555,19 @@ namespace CafeLibrary.ModelConversion
 
                 Console.WriteLine($"fshp {fshp.Name} submeshes {mesh.SubMeshes.Count}");
 
-                fshp.SubMeshBoundingIndices.Add(0);
-                fshp.SubMeshBoundingNodes.Add(new BoundingNode()
+                for (int i = 0; i < fshp.SubMeshBoundings.Count; i++)
                 {
-                    LeftChildIndex = 0,
-                    RightChildIndex = 0,
-                    NextSibling = 0,
-                    SubMeshIndex = 0,
-                    Unknown = 0,
-                    SubMeshCount = (ushort)mesh.SubMeshes.Count,
-                });
+                    fshp.SubMeshBoundingIndices.Add((ushort)i);
+                    fshp.SubMeshBoundingNodes.Add(new BoundingNode()
+                    {
+                        LeftChildIndex = (ushort)i, //can match current node idx
+                        RightChildIndex = (ushort)i, //can match current node idx
+                        NextSibling = (ushort)(i < fshp.SubMeshBoundings.Count - 1 ? i + 1 : i), //next or last idx
+                        SubMeshIndex = (ushort)i,
+                        Unknown = (ushort)i, //always current idx
+                        SubMeshCount = 1,
+                    });
+                }
             }
             else 
             {

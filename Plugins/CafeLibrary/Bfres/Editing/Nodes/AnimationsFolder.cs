@@ -37,6 +37,7 @@ namespace CafeLibrary
             ContextMenus.Add(new MenuItemModel("New Shader Param Animation", AddShaderParamAnim));
             ContextMenus.Add(new MenuItemModel("New Tex SRT Animation", AddTexSRTAnim));
             ContextMenus.Add(new MenuItemModel("New Color Animation", AddColorAnim));
+            ContextMenus.Add(new MenuItemModel("New Bone Vis Animation", AddVisAnimation));
 
             SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel("New Skeleton Animation", AddSkeletalAnim));
             SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel(""));
@@ -174,6 +175,18 @@ namespace CafeLibrary
             }
 
             Reload();
+        }
+
+        private void AddVisAnimation()
+        {
+            var anim = new VisibilityAnim() { Name = "VisibilityAnim" };
+            anim.Name = Utils.RenameDuplicateString(anim.Name, ResFile.BoneVisibilityAnims.Keys.Select(x => x).ToList());
+            ResFile.BoneVisibilityAnims.Add(anim.Name, anim);
+
+            AddVisAnimation(anim);
+
+            if (BoneVisAnimsFolder.Parent == null) 
+                AddChild(BoneVisAnimsFolder);
         }
 
         private void ReplaceAllSkeletalAnim()

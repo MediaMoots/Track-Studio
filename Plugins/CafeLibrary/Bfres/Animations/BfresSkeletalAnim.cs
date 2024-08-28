@@ -114,8 +114,7 @@ namespace CafeLibrary.Rendering
             dlg.AddFilter(".bfska", ".bfska");
             dlg.AddFilter(".json", ".json");
             dlg.AddFilter(".anim", ".anim");
-            //dlg.AddFilter(".gltf", ".gltf");
-            //dlg.AddFilter(".glb", ".glb");
+            dlg.AddFilter(".smd", ".smd");
 
             if (filePath is not null || dlg.ShowDialog())
             {
@@ -129,6 +128,7 @@ namespace CafeLibrary.Rendering
                     case ".anim":
                     case ".gltf":
                     case ".glb":
+                    case ".smd":
                         var models = GetActiveSkeletonModels();
                         if (models.Count == 1)
                         {
@@ -187,6 +187,13 @@ namespace CafeLibrary.Rendering
             var dlg = new ImguiFileDialog();
             dlg.SaveDialog = false;
             dlg.FileName = $"{SkeletalAnim.Name}.json";
+            dlg.AddFilter(".bfska", ".bfska");
+            dlg.AddFilter(".json", ".json");
+            dlg.AddFilter(".anim", ".anim");
+            dlg.AddFilter(".smd", ".smd");
+
+            // dlg.AddFilter(".gltf", ".gltf");
+            // dlg.AddFilter(".glb", ".glb");
 
             if (!boneConfigOnly)
             {
@@ -206,7 +213,7 @@ namespace CafeLibrary.Rendering
                     case ".anim":
                     case ".gltf":
                     case ".glb":
-
+                    case ".smd":
                         var models = GetActiveSkeletonModels();
                         if (models.Count == 1)
                         {
@@ -319,7 +326,7 @@ namespace CafeLibrary.Rendering
             //Add new material group if doesn't exist
             if (group == null)
             {
-                group = new BoneAnimGroup() { Name = bone.Name, };
+                group = new BoneAnimGroup(new BoneAnim()) { Name = bone.Name, };
                 this.AnimGroups.Add(group);
                 //Add UI node
                 if (!Root.Children.Any(x => x.Header == group.Name))
@@ -523,7 +530,7 @@ namespace CafeLibrary.Rendering
             AnimGroups.Clear();
             foreach (var boneAnim in anim.BoneAnims)
             {
-                var group = new BoneAnimGroup();
+                var group = new BoneAnimGroup(boneAnim);
                 AnimGroups.Add(group);
 
                 group.Name = boneAnim.Name;
@@ -675,6 +682,8 @@ namespace CafeLibrary.Rendering
 
         public class BoneAnimGroup : STAnimGroup
         {
+            public BoneAnim BoneAnimData;
+
             public Vector3Group Translate { get; set; }
             public Vector4Group Rotate { get; set; }
             public Vector3Group Scale { get; set; }
@@ -683,8 +692,10 @@ namespace CafeLibrary.Rendering
 
             public bool UseQuaternion = false;
 
-            public BoneAnimGroup()
+            public BoneAnimGroup(BoneAnim boneAnim)
             {
+                BoneAnimData = boneAnim;
+
                 Translate = new Vector3Group() { Name = "Translate" };
                 Rotate = new Vector4Group() { Name = "Rotate" };
                 Scale = new Vector3Group() { Name = "Scale" };
