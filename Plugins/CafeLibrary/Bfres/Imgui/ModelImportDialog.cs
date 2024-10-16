@@ -52,17 +52,6 @@ namespace CafeLibrary
                 meshSettings.Name = mesh.Name;
                 meshSettings.MaterialName = "";
                 meshSettings.MeshSkinCount = mesh.Vertices.Max(x => x.Envelope.Weights.Count);
-                //meshSettings.DataSkinCount = meshSettings.MeshSkinCount;
-                if (meshSettings.MeshSkinCount == 16 || meshSettings.MeshSkinCount > 4)
-                {
-                    meshSettings.UseCustomDataSkinCount = true;
-                    meshSettings.DataSkinCount = 8; // Static to 8
-                }
-                else if (meshSettings.MeshSkinCount > 1 && meshSettings.MeshSkinCount < 4)
-                {
-                    meshSettings.UseCustomDataSkinCount = true;
-                    meshSettings.DataSkinCount = 4; // Static to 4
-                }
                 meshSettings.Normal.Enable = mesh.HasNormals;
                 meshSettings.UVs.Enable = mesh.HasUVSet(0);
                 meshSettings.UVLayerCount = (uint)MathF.Max(mesh.Vertices.Max(x => x.UVs.Count), 1);
@@ -94,6 +83,47 @@ namespace CafeLibrary
                     if (mesh.Polygons[0].MaterialName == material.Name && fmdl.Materials.Any(x => x.Name == material.Label))
                     {
                         meshSettings.MaterialName = material.Label;
+
+                        FMAT? fmat = fmdl.Materials.Find(match => match.Name == material.Name) as FMAT;
+                        if (fmat != null)
+                        {
+                            BfresLibrary.UserData? userData;
+                            fmat.Material.UserData.TryGetValue("ZGW_SkinCounts", out userData);
+                            if (userData != null)
+                            {
+                                int[] skinCounts = userData.GetValueInt32Array();
+                                if (!skinCounts.Contains(meshSettings.MeshSkinCount))
+                                {
+                                    if (meshSettings.MeshSkinCount > 1)
+                                    {
+                                        if (skinCounts.Max() < meshSettings.MeshSkinCount)
+                                        {
+                                            meshSettings.UseCustomDataSkinCount = true;
+                                            meshSettings.DataSkinCount = 8;
+                                        }
+                                        else
+                                        {
+                                            meshSettings.UseCustomDataSkinCount = true;
+                                            meshSettings.DataSkinCount = skinCounts.Max();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        meshSettings.MeshSkinCount = 8;
+                                    }
+                                }
+                            }
+                        }
+                        else if (meshSettings.MeshSkinCount == 16 || meshSettings.MeshSkinCount > 4)
+                        {
+                            meshSettings.UseCustomDataSkinCount = true;
+                            meshSettings.DataSkinCount = 8; // Static to 8
+                        }
+                        else if (meshSettings.MeshSkinCount > 1 && meshSettings.MeshSkinCount < 4)
+                        {
+                            meshSettings.UseCustomDataSkinCount = true;
+                            meshSettings.DataSkinCount = 4; // Static to 4
+                        }
                         break;
                     }
                 }
@@ -216,31 +246,39 @@ namespace CafeLibrary
             ImGui.BeginColumns("formatSetting", 2);
 
             //Global settings where each format is globally applied to all meshes
-            DrawAttribute("Positions", this.Settings.Position, () => {
+            DrawAttribute("Positions", this.Settings.Position, () =>
+            {
                 Settings.Meshes.ForEach(x => x.Position.Format = Settings.Position.Format);
             });
-            DrawAttribute("Normals", this.Settings.Normal, () => {
+            DrawAttribute("Normals", this.Settings.Normal, () =>
+            {
                 Settings.Meshes.ForEach(x => x.Normal.Format = Settings.Normal.Format);
             });
-            DrawAttribute("UVS", this.Settings.UVs, () => {
+            DrawAttribute("UVS", this.Settings.UVs, () =>
+            {
                 Settings.Meshes.ForEach(x => x.UVs.Format = Settings.UVs.Format);
             });
-            DrawAttribute("Vertex Colors", this.Settings.Colors, () => {
+            DrawAttribute("Vertex Colors", this.Settings.Colors, () =>
+            {
                 Settings.Meshes.ForEach(x => x.Colors.Format = Settings.Colors.Format);
             });
 
             ImGui.NextColumn();
 
-            DrawAttribute("Tangents", this.Settings.Tangent, () => {
+            DrawAttribute("Tangents", this.Settings.Tangent, () =>
+            {
                 Settings.Meshes.ForEach(x => x.Tangent.Format = Settings.Tangent.Format);
             });
-            DrawAttribute("Bitangents", this.Settings.Bitangent,() => {
+            DrawAttribute("Bitangents", this.Settings.Bitangent, () =>
+            {
                 Settings.Meshes.ForEach(x => x.Bitangent.Format = Settings.Bitangent.Format);
             });
-            DrawAttribute("Bone Indices", this.Settings.BoneIndices,  () => {
+            DrawAttribute("Bone Indices", this.Settings.BoneIndices, () =>
+            {
                 Settings.Meshes.ForEach(x => x.BoneIndices.Format = Settings.BoneIndices.Format);
             });
-            DrawAttribute("Bone Weights", this.Settings.BoneWeights, () => {
+            DrawAttribute("Bone Weights", this.Settings.BoneWeights, () =>
+            {
                 Settings.Meshes.ForEach(x => x.BoneWeights.Format = Settings.BoneWeights.Format);
             });
 
@@ -382,7 +420,7 @@ namespace CafeLibrary
             }
 
             ImGui.Checkbox($"Enable Sub Meshes (Experimental)", ref Settings.EnableSubMesh);
-            
+
             ImGui.EndColumns();
         }
 
