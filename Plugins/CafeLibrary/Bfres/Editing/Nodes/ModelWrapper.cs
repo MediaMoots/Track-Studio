@@ -229,6 +229,8 @@ namespace CafeLibrary
             MaterialFolder.ContextMenus.Add(new MenuItemModel("Export All - JSON", ExportMaterialsToJsonDialog));
             MaterialFolder.ContextMenus.Add(new MenuItemModel("Export All - BFMAT", ExportMaterialsToBfmatDialog));
             MaterialFolder.ContextMenus.Add(new MenuItemModel("Export All - ZIP", ExportMaterialsToZipDialog));
+            MaterialFolder.ContextMenus.Add(new MenuItemModel(""));
+            MaterialFolder.ContextMenus.Add(new MenuItemModel("Clear All Materials", ClearAllMaterials));
 
             MeshFolder.ContextMenus.Add(new MenuItemModel("Recalculate Tangent/Bitangent", RecalculateTanBitanActionAll));
 
@@ -361,6 +363,13 @@ namespace CafeLibrary
             }
         }
 
+        private void ClearAllMaterials()
+        {
+            var materials = Materials.ToList();
+            foreach (FMAT mat in materials)
+                RemoveMaterial(mat);
+        }
+
         private void ExportMaterialsToJsonDialog()
         {
             ExportMaterialsDialog(".json");
@@ -433,6 +442,18 @@ namespace CafeLibrary
                 Materials.Add(fmat);
                 if (!this.Model.Materials.ContainsKey(fmat.Name))
                     this.Model.Materials.Add(fmat.Name, fmat.Material);
+            }
+
+            // Recreate materials list
+            List<Material> materials = new List<Material>();
+            foreach (var item in Model.Materials)
+            {
+                materials.Add(item.Value);
+            }
+            Model.Materials.Clear();
+            foreach (Material material in materials)
+            {
+                Model.Materials.Add(material.Name, material);
             }
         }
         private void RecalculateTanBitanActionAll()
@@ -868,6 +889,23 @@ namespace CafeLibrary
                 //Update UI too
                 if (UINode.Header != value)
                     UINode.Header = value;
+
+                if (!ResFile.Models.ContainsKey("0"))
+                {
+                    return;
+                }
+
+                // Recreate materials list
+                List<Material> materials = new List<Material>();
+                foreach (var item in ResFile.Models[0].Materials)
+                {
+                    materials.Add(item.Value);
+                }
+                ResFile.Models[0].Materials.Clear();
+                foreach (Material material in materials)
+                {
+                    ResFile.Models[0].Materials.Add(material.Name, material);
+                }
             }
         }
 
