@@ -84,7 +84,7 @@ namespace CafeLibrary
                     {
                         meshSettings.MaterialName = material.Label;
 
-                        FMAT? fmat = fmdl.Materials.Find(match => match.Name == material.Name) as FMAT;
+                        FMAT? fmat = fmdl.Materials.Find(match => match.Name == material.Label) as FMAT;
                         if (fmat != null)
                         {
                             BfresLibrary.UserData? userData;
