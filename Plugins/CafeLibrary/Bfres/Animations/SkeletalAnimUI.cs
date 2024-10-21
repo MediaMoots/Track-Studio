@@ -8,6 +8,7 @@ using BfresLibrary;
 using CafeLibrary.Rendering;
 using MapStudio.UI;
 using Toolbox.Core.Animations;
+using System.Collections.Immutable;
 
 namespace CafeLibrary
 {
@@ -38,6 +39,41 @@ namespace CafeLibrary
                 anim.IsEdited = true;
             }));
             Root.ContextMenus.Add(new MenuItem("Rename", () => Root.ActivateRename = true));
+
+            void SortAnimation(bool ascending)
+            {
+                // Sort anim.Root.Children by Header
+                var sortedChildren = ascending
+                    ? anim.Root.Children.OrderBy(child => child.Header).ToList()
+                    : anim.Root.Children.OrderByDescending(child => child.Header).ToList();
+
+                anim.Root.Children.Clear();
+                foreach (var child in sortedChildren)
+                {
+                    anim.Root.Children.Add(child);
+                }
+
+                // Sort anim.AnimGroups by Name
+                if (ascending)
+                {
+                    anim.AnimGroups.Sort((group1, group2) =>
+                        string.Compare(group1.Name, group2.Name, StringComparison.Ordinal));
+                }
+                else
+                {
+                    anim.AnimGroups.Sort((group1, group2) =>
+                        string.Compare(group2.Name, group1.Name, StringComparison.Ordinal));
+                }
+            }
+
+            Root.ContextMenus.Add(new MenuItem("Sort (A -> Z)", () =>
+            {
+                SortAnimation(true);
+            }));
+            Root.ContextMenus.Add(new MenuItem("Sort (Z -> A)", () =>
+            {
+                SortAnimation(false);
+            }));
             Root.ContextMenus.Add(new MenuItem("Delete Selected", () =>
             {
                 // Create a copy of the Children collection to iterate over
