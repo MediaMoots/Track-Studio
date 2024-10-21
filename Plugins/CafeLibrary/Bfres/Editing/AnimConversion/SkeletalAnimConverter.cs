@@ -28,6 +28,7 @@ namespace CafeLibrary
             animation.Path = "";
             animation.FrameCount = (int)anim.FrameCount;
             animation.Baked = false;
+            animation.Loop = anim.Loop;
             animation.FlagsRotate = SkeletalAnimFlagsRotate.EulerXYZ;
             animation.FlagsScale = SkeletalAnimFlagsScale.Maya;
             animation.BoneAnims = new List<BoneAnimHelper>();
@@ -50,9 +51,9 @@ namespace CafeLibrary
                     group.Rotate.Z.GetFrameValue(0),
                     group.Rotate.W.HasKeys ? group.Rotate.W.GetFrameValue(0) : 1.0f);
                 var scale = new Vector3F(
-                    group.Scale.X.HasKeys ? group.Scale.X.GetFrameValue(0) : 1.0f,
-                    group.Scale.Y.HasKeys ? group.Scale.Y.GetFrameValue(0) : 1.0f,
-                    group.Scale.Z.HasKeys ? group.Scale.Z.GetFrameValue(0) : 1.0f);
+                    group.Scale.X.HasKeys ? group.Scale.X.GetFrameValue(0) : 0.0f,
+                    group.Scale.Y.HasKeys ? group.Scale.Y.GetFrameValue(0) : 0.0f,
+                    group.Scale.Z.HasKeys ? group.Scale.Z.GetFrameValue(0) : 0.0f);
 
                 boneAnim.BaseData = new BaseDataHelper()
                 {
@@ -61,9 +62,9 @@ namespace CafeLibrary
                     Scale = scale,
                 };
 
-                boneAnim.UseBaseRotation = true;
-                boneAnim.UseBaseScale = true;
-                boneAnim.UseBaseTranslation = true;
+                boneAnim.UseBaseRotation = group.BoneAnimData.UseRotation;
+                boneAnim.UseBaseScale = group.BoneAnimData.UseScale;
+                boneAnim.UseBaseTranslation = group.BoneAnimData.UseTranslation;
                 boneAnim.Curves = new List<CurveAnimHelper>();
 
                 if (group.Translate.X.KeyFrames.Count > 1) boneAnim.Curves.Add(ConvertCurve(group.Translate.X, "PositionX"));

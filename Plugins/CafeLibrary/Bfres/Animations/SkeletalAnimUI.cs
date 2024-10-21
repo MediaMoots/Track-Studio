@@ -7,6 +7,7 @@ using UIFramework;
 using BfresLibrary;
 using CafeLibrary.Rendering;
 using MapStudio.UI;
+using Toolbox.Core.Animations;
 
 namespace CafeLibrary
 {
@@ -37,6 +38,37 @@ namespace CafeLibrary
                 anim.IsEdited = true;
             }));
             Root.ContextMenus.Add(new MenuItem("Rename", () => Root.ActivateRename = true));
+            Root.ContextMenus.Add(new MenuItem("Delete Selected", () =>
+            {
+                // Create a copy of the Children collection to iterate over
+                foreach (var boneNode in anim.Root.Children.ToList())
+                {
+                    if (!boneNode.IsSelected)
+                    {
+                        continue;
+                    }
+
+                    foreach (var child in boneNode.Children)
+                    {
+                        if (child is AnimationTree.GroupNode groupNode)
+                        {
+                            groupNode.OnGroupRemoved?.Invoke(child, EventArgs.Empty);
+                        }
+                    }
+
+                    STAnimGroup? foundGroup = anim.AnimGroups.Find(group => group.Name == boneNode.Header);
+                    if (foundGroup == null)
+                    {
+                        continue;
+                    }
+
+                    // Remove from animation
+                    anim.AnimGroups.Remove(foundGroup);
+
+                    // Remove from UI
+                    anim.Root.Children.Remove(boneNode);
+                }
+            }));
 
             Root.Children.Clear();
             foreach (BfresSkeletalAnim.BoneAnimGroup group in anim.AnimGroups)
