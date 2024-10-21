@@ -83,7 +83,6 @@ namespace CafeLibrary.ModelConversion
             var tangents = TryGetValues(helper, "_t0");
             var bitangents = TryGetValues(helper, "_b0");
 
-            
             List<Syroot.Maths.Vector4F[]> weightsList = new List<Syroot.Maths.Vector4F[]>();
             List<Syroot.Maths.Vector4F[]> indicesList = new List<Syroot.Maths.Vector4F[]>();
             for (int i = 0; i < indexWeightBuffers; i++)
@@ -91,6 +90,12 @@ namespace CafeLibrary.ModelConversion
                 weightsList.Add(TryGetValues(helper, $"_w{i}"));
                 indicesList.Add(TryGetValues(helper, $"_i{i}"));
             }
+
+            var weights0 = TryGetValues(helper, "_w0");
+            var indices0 = TryGetValues(helper, "_i0");
+            var texCoordsCombined1 = TryGetValues(helper, "_g3d_02_u0_u1");
+            var texCoordsCombined2 = TryGetValues(helper, "_g3d_02_u2_u1");
+            var texCoordsCombined3 = TryGetValues(helper, "_g3d_02_u2_u3");
 
             //Get the position attribute and use the length for the vertex count
             for (int v = 0; v < positions.Length; v++)
@@ -107,6 +112,23 @@ namespace CafeLibrary.ModelConversion
                     for (int i = 0; i < texCoords.Length; i++)
                         vertex.SetUV(texCoords[i][v].X, 1 - texCoords[i][v].Y, i);
                 }
+
+                if (texCoordsCombined1.Length > 0)
+                {
+                    vertex.SetUV(texCoordsCombined1[v].X, 1 - texCoordsCombined1[v].Y, 0);
+                    vertex.SetUV(texCoordsCombined1[v].Z, 1 - texCoordsCombined1[v].W, 1);
+                }
+                if (texCoordsCombined2.Length > 0)
+                {
+                    vertex.SetUV(texCoordsCombined2[v].X, 1 - texCoordsCombined2[v].Y, 2);
+                    vertex.SetUV(texCoordsCombined2[v].Z, 1 - texCoordsCombined2[v].W, 3);
+                }
+                if (texCoordsCombined3.Length > 0)
+                {
+                    vertex.SetUV(texCoordsCombined3[v].X, 1 - texCoordsCombined3[v].Y, 2);
+                    vertex.SetUV(texCoordsCombined3[v].Z, 1 - texCoordsCombined3[v].W, 3);
+                }
+
                 if (colors.Length > 0)
                 {
                     for (int i = 0; i < colors.Length; i++)

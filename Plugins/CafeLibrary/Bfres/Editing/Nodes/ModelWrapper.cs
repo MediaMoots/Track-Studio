@@ -610,6 +610,7 @@ namespace CafeLibrary
                         if (!ok)
                             return;
 
+                        modelDlg.OnApply(materials);
                         //Import the bfres model data
                         Model = BfresModelImporter.ImportModel(ResFile, Model, ioscene, filePath, settings);
                         ImportModel(Model, materials, settings);
@@ -618,6 +619,7 @@ namespace CafeLibrary
                 }
                 else
                 {
+                    modelDlg.OnApply(materials);
                     //Import the bfres model data
                     Model = BfresModelImporter.ImportModel(ResFile, Model, ioscene, filePath, settings);
                     ImportModel(Model, materials, settings);
@@ -966,9 +968,8 @@ namespace CafeLibrary
 
         /// <summary>
         /// Checks if the material is valid or not. 
-        /// Determines based on having empty render data or not.
         /// </summary>
-        public bool IsMaterialInvalid => Material != null && Material.RenderInfos.Count == 0 && Material.ShaderAssign != null;
+        public bool IsMaterialInvalid = false;
 
         public string ShaderArchiveName { get; set; }
         public string ShaderModelName { get; set; }
@@ -1361,6 +1362,9 @@ namespace CafeLibrary
             if (Material.RenderInfos.ContainsKey("gsys_render_state_display_face"))
                 revertedRenderInfos.Add("gsys_render_state_display_face", Material.RenderInfos["gsys_render_state_display_face"]);
 
+            //temp hack, only add placeholders for MK8
+            bool usePlaceholders = Material.ShaderParams.ContainsKey("gsys_area_env_index_diffuse");
+
             string dir = Path.GetDirectoryName(filePath);
             string presetName = Path.GetFileNameWithoutExtension(filePath);
 
@@ -1471,7 +1475,7 @@ namespace CafeLibrary
                     int index = previousSamplers.FindIndex(x => x.Name == Material.Samplers[i].Name);
                     if (index != -1) //Use the matching index to match up the texture replaced
                         Material.TextureRefs[i].Name = previousTextures[index].Name;
-                    else //else swap it out with a placeholder texture
+                    else if  (usePlaceholders) //else swap it out with a placeholder texture
                         AddPlaceholderTextures(Material, Material.Samplers[i].Name, i);
                 }
             }
@@ -1527,7 +1531,7 @@ namespace CafeLibrary
                     Material.RenderInfos[info.Name] = info;
             }
 
-            if (!keepTextures)
+            if (!keepTextures && usePlaceholders)
             {
                 for (int i = 0; i < Material.Samplers.Count; i++)
                     AddPlaceholderTextures(Material, Material.Samplers[i].Name, i);

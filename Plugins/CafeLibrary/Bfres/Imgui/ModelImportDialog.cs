@@ -8,6 +8,7 @@ using MapStudio.UI;
 using IONET.Core;
 using Toolbox.Core;
 using IONET.Core.Model;
+using BfresLibrary;
 
 namespace CafeLibrary
 {
@@ -24,6 +25,24 @@ namespace CafeLibrary
         public ModelImportDialog() : base("Model Import Settings", new Vector2(200, 200))
         {
 
+        }
+
+        public void OnApply(List<Material> materials)
+        {
+            foreach (var mesh in this.Settings.Meshes)
+            {
+                //Map original by default
+                var mat = materials.FirstOrDefault(x => x.Name == mesh.MaterialName);
+                //Map to imported instance if needed
+                if (mesh.MaterialInstance != null)
+                    mat = mesh.MaterialInstance;
+
+                if (mat != null) {
+                    //Use combined UVs if used by the material
+                    mesh.CombineUVs = mat.ShaderAssign != null &&
+                                      mat.ShaderAssign.AttribAssigns.ContainsValue("_g3d_02_u0_u1");
+                }
+            }
         }
 
         public void Setup(FMDL fmdl, IOScene scene, ModelImportSettings settings)

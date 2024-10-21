@@ -61,6 +61,18 @@ namespace CafeLibrary.Rendering
             UINode.Icon = IconManager.SKELEAL_ANIM_ICON.ToString();
             UINode.OnHeaderRenamed += delegate
             {
+                //not changed
+                if (anim.Name == UINode.Header)
+                    return;
+
+                //Dupe name
+                if (resFile.SkeletalAnims.ContainsKey(UINode.Header))
+                {
+                    TinyFileDialog.MessageBoxErrorOk($"Name {UINode.Header} already exists!");
+                    //revert
+                    UINode.Header = anim.Name;
+                    return;
+                }
                 OnRenamed(UINode.Header);
             };
 

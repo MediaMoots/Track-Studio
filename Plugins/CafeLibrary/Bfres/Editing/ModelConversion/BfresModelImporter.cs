@@ -518,10 +518,6 @@ namespace CafeLibrary.ModelConversion
             List<uint> indexList = new List<uint>();
             indexList = indices.Select(x => (uint)x).ToList();
 
-            //If a mesh's vertex data is split into parts, we can create sub meshes with their own boundings
-            CalculateMeshDivision(vertices, fshp, mesh, indices, ref indexList, enableSubMesh);
-
-            //Finally setup the full index list of the entire mesh
             GX2IndexFormat Format = GX2IndexFormat.UInt16;
             if (resFile.IsPlatformSwitch)
             {
@@ -535,10 +531,14 @@ namespace CafeLibrary.ModelConversion
                     Format = GX2IndexFormat.UInt32;
             }
 
+            //If a mesh's vertex data is split into parts, we can create sub meshes with their own boundings
+            CalculateMeshDivision(vertices, fshp, mesh, Format, indices, ref indexList, enableSubMesh);
+
+            //Finally setup the full index list of the entire mesh
             mesh.SetIndices(indexList, Format);
         }
 
-        static void CalculateMeshDivision(List<IOVertex> vertices, Shape fshp, Mesh mesh, List<int> indices, ref List<uint> indexList, bool enableSubMesh)
+        static void CalculateMeshDivision(List<IOVertex> vertices, Shape fshp, Mesh mesh, GX2IndexFormat format, List<int> indices, ref List<uint> indexList, bool enableSubMesh)
         {
             if (enableSubMesh)
             {
@@ -546,12 +546,14 @@ namespace CafeLibrary.ModelConversion
                 indexList.Clear();
                 var divided = PolygonDivision.Divide(vertices, indices);
 
+                //keep first bounding as it determines camera frustum
+                var boundingFull = fshp.SubMeshBoundings.FirstOrDefault();
+
                 fshp.SubMeshBoundingNodes.Clear();
                 fshp.SubMeshBoundings.Clear();
 
-                int offset = 0;
                 foreach (var root in divided)
-                    AddSubMesh(root, ref fshp, ref mesh, ref offset, ref indexList);
+                    AddSubMesh(root, format, ref fshp, ref mesh, ref indexList);
 
                 Console.WriteLine($"fshp {fshp.Name} submeshes {mesh.SubMeshes.Count}");
 
@@ -568,6 +570,8 @@ namespace CafeLibrary.ModelConversion
                         SubMeshCount = 1,
                     });
                 }
+                //Full bounding at the end
+                fshp.SubMeshBoundings.Add(boundingFull);
             }
             else 
             {
@@ -628,9 +632,13 @@ namespace CafeLibrary.ModelConversion
             }
         }
 
-        static void AddSubMesh(DivSubMesh subMesh, ref Shape shape, ref Mesh mesh, ref int offset, ref List<uint> indexList)
+        static void AddSubMesh(DivSubMesh subMesh, GX2IndexFormat format, ref Shape shape, ref Mesh mesh, ref List<uint> indexList)
         {
-            offset += indexList.Count;
+            bool isUshort = (format == GX2IndexFormat.UInt16 ||
+                             format == GX2IndexFormat.UInt16LittleEndian);
+
+            var stride = isUshort ? sizeof(ushort) : sizeof(uint);
+            var offset = indexList.Count * stride;
             indexList.AddRange(subMesh.Faces.Select(x => (uint)x).ToList());
 
             int index = mesh.SubMeshes.Count;
@@ -649,10 +657,7 @@ namespace CafeLibrary.ModelConversion
                 Center = new Vector3F(center.X, center.Y, center.Z),
                 Extent = new Vector3F(extent.X, extent.Y, extent.Z),
             };
-            float sphereRadius = System.Numerics.Vector3.Distance(center, subMesh.Max);
-
             shape.SubMeshBoundings.Add(boundingBox);
-            shape.RadiusArray.Add(sphereRadius);
         }
 
         private static float CalculateRadius(float horizontalLeg, float verticalLeg)
@@ -905,15 +910,29 @@ namespace CafeLibrary.ModelConversion
                         binormal.Z, 1));
                 }
 
+                int currentIdx = 0;
                 for (int i = 0; i < vertex.UVs?.Count; i++)
                 {
                     if (i >= TexCoords.Length)
                         continue;
 
-                    TexCoords[i][v] = new Vector4F(
-                        vertex.UVs[i].X,
-                        1 - vertex.UVs[i].Y,
-                        0, 0);
+                    if (settings.CombineUVs && i % 2 == 0 && i < vertex.UVs.Count - 1)
+                    {
+                        TexCoords[currentIdx][v] = new Vector4F(
+                               vertex.UVs[i].X,
+                           1 - vertex.UVs[i].Y,
+                               vertex.UVs[i + 1].X,
+                           1 - vertex.UVs[i + 1].Y);
+                        currentIdx++;
+                    }
+                    else
+                    {
+                        TexCoords[currentIdx][v] = new Vector4F(
+                            vertex.UVs[i].X,
+                            1 - vertex.UVs[i].Y,
+                            0, 0);
+                        currentIdx++;
+                    }
                 }
 
                 for (int i = 0; i < vertex.Colors?.Count; i++)
@@ -1058,12 +1077,30 @@ namespace CafeLibrary.ModelConversion
                 });
             }
 
-            for (int i = 0; i < TexCoords.Length; i++)
+            if (settings.CombineUVs && TexCoords.Length > 0)
             {
-                var format = i == 0 ? settings.UVs.Format : settings.UV_Layers.Format;
-
-                if (settings.UseTexCoord[i])
+                //Combine types will use 2 layer types
+                attributes.Add(new VertexBufferHelperAttrib()
                 {
+                    Name = $"_g3d_02_u0_u1",
+                    Data = TexCoords[0],
+                    Format = GX2AttribFormat.Format_16_16_16_16_Single,
+                });
+                if (TexCoords.Length > 1)
+                {
+                    attributes.Add(new VertexBufferHelperAttrib()
+                    {
+                        Name = $"_g3d_02_u2_u3",
+                        Data = TexCoords[1],
+                        Format = GX2AttribFormat.Format_16_16_16_16_Single,
+                    });
+                }
+            }
+            else
+            {
+                for (int i = 0; i < TexCoords.Length; i++)
+                {
+                    var format = i == 0 ? settings.UVs.Format : settings.UV_Layers.Format;
                     attributes.Add(new VertexBufferHelperAttrib()
                     {
                         Name = $"_u{i}",
