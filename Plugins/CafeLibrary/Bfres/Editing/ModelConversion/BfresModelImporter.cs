@@ -231,15 +231,6 @@ namespace CafeLibrary.ModelConversion
                           mesh.TransformVertices(bn.WorldTransform);
                   }*/
 
-
-                //Todo. This basically reimports meshes with the original skin count to target as
-                if (importSettings.Meshes.Any(x => x.Name == mesh.Name))
-                {
-                    var meshSettings = importSettings.Meshes.FirstOrDefault(x => x.Name == mesh.Name);
-                    if (meshSettings != null)
-                        vertexSkinCount = (uint)meshSettings.MeshSkinCount;
-                }
-
                 skinCounts[sindex++] = vertexSkinCount;
 
                 foreach (var vertex in mesh.Vertices)
@@ -330,7 +321,11 @@ namespace CafeLibrary.ModelConversion
             foreach (var mesh in model.Meshes)
             {
                 if (mesh.Vertices.Count == 0)
+                {
+                    meshIndex++;
                     continue;
+                }
+                    
 
                 mesh.TransformVertices(GlobalTransform);
 
@@ -346,6 +341,7 @@ namespace CafeLibrary.ModelConversion
                 if (meshSettings == null || 
                     (importSettings.SkipMeshesWithInvalidMaterials && meshSettings.MaterialName == ""))
                 {
+                    meshIndex++;
                     continue;
                 }
 

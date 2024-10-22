@@ -534,6 +534,8 @@ namespace CafeLibrary
             dlg.AddFilter(".bfmdl", ".bfmdl");
             dlg.AddFilter(".dae", ".dae");
             dlg.AddFilter(".fbx", ".fbx");
+            dlg.AddFilter(".gltf", ".gltf");
+            dlg.AddFilter(".glb", ".glb");
 
             if (dlg.ShowDialog())
             {

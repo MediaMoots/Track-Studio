@@ -153,8 +153,8 @@ namespace CafeLibrary
             dlg.AddFilter(".bfska", ".bfska");
             dlg.AddFilter(".json", ".json");
             dlg.AddFilter(".anim", ".anim");
-            // dlg.AddFilter(".gltf", ".gltf");
-            // dlg.AddFilter(".glb", ".glb");
+            dlg.AddFilter(".gltf", ".gltf");
+            dlg.AddFilter(".glb", ".glb");
 
             if (dlg.ShowDialog())
             {

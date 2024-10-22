@@ -127,6 +127,8 @@ namespace CafeLibrary.Rendering
             dlg.AddFilter(".json", ".json");
             dlg.AddFilter(".anim", ".anim");
             dlg.AddFilter(".smd", ".smd");
+            dlg.AddFilter(".gltf", ".gltf");
+            dlg.AddFilter(".glb", ".glb");
 
             if (filePath is not null || dlg.ShowDialog())
             {
@@ -141,6 +143,7 @@ namespace CafeLibrary.Rendering
                     case ".gltf":
                     case ".glb":
                     case ".smd":
+                    case ".dae":
                         var models = GetActiveSkeletonModels();
                         if (models.Count == 1)
                         {
@@ -203,16 +206,13 @@ namespace CafeLibrary.Rendering
             dlg.AddFilter(".json", ".json");
             dlg.AddFilter(".anim", ".anim");
             dlg.AddFilter(".smd", ".smd");
-
-            // dlg.AddFilter(".gltf", ".gltf");
-            // dlg.AddFilter(".glb", ".glb");
+            dlg.AddFilter(".gltf", ".gltf");
+            dlg.AddFilter(".glb", ".glb");
 
             if (!boneConfigOnly)
             {
                 dlg.AddFilter(".bfska", ".bfska");
                 dlg.AddFilter(".anim", ".anim");
-                // dlg.AddFilter(".gltf", ".gltf");
-                // dlg.AddFilter(".glb", ".glb");
             }
             dlg.AddFilter(".json", ".json");
 
