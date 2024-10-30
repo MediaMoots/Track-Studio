@@ -41,14 +41,13 @@ namespace CafeLibrary
             ContextMenus.Add(new MenuItemModel("New Bone Vis Animation", AddVisAnimation));
             ContextMenus.Add(new MenuItemModel("New Scene Animation", AddSceneAnimation));
 
-            SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel("New Skeleton Animation", AddSkeletalAnim));
+            SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel("Import", ImportSkeletalAnim));
+            SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel(""));
+            SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel("Replace", ReplaceSkeletalAnim));
             SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel(""));
             SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel("Export All", ExportAllSkeletalAnim));
             SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel(""));
-            SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel("Import Multiple", ImportAllSkeletalAnim));
-            SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel("Replace Multiple", ReplaceAllSkeletalAnim));
-            SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel("Replace Multiple Bone Config", ReplaceAllSkeletalAnimBoneConfig));
-            
+            SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel("New Skeleton Animation", AddSkeletalAnim));
 
             TexPatternAnimsFolder.ContextMenus.Add(new MenuItemModel("New Texture Pattern Animation", AddTextureAnim));
             ShaderParamAnimsFolder.ContextMenus.Add(new MenuItemModel("New Shader Param Animation", AddShaderParamAnim));
@@ -144,7 +143,7 @@ namespace CafeLibrary
             Reload();
         }
 
-        private void ImportAllSkeletalAnim()
+        private void ImportSkeletalAnim()
         {
             var dlg = new ImguiFileDialog();
             dlg.SaveDialog = false;
@@ -162,17 +161,28 @@ namespace CafeLibrary
                 {
                     string fileName = Path.GetFileName(dlgFilePath).Split(".")[0];
 
-                    ResFile.SkeletalAnims.TryGetValue(fileName, out var skeletalAnim);
-
-                    var anim = skeletalAnim ?? new SkeletalAnim() { Name = fileName, FlagsRotate = SkeletalAnimFlagsRotate.EulerXYZ };
-                    anim.Name = Utils.RenameDuplicateString(anim.Name, ResFile.SkeletalAnims.Keys.Select(x => x).ToList());
+                    // Create new Anim
+                    var anim = new SkeletalAnim() { Name = fileName, FlagsRotate = SkeletalAnimFlagsRotate.EulerXYZ };
                     anim.Import(dlgFilePath, ResFile);
+                    anim.Name = Utils.RenameDuplicateString(anim.Name, ResFile.SkeletalAnims.Keys.Select(x => x).ToList());
 
-                    if (skeletalAnim is null)
-                        ResFile.SkeletalAnims.Add(anim.Name, anim);
+                    ResFile.SkeletalAnims.Add(anim.Name, anim);
+
                     AddSkeletalAnimation(anim);
 
                     if (SkeletalAnimsFolder.Parent == null) AddChild(SkeletalAnimsFolder);
+
+                    // Recreate skeletalAnims list
+                    List<SkeletalAnim> skeletalAnims = new List<SkeletalAnim>();
+                    foreach (var item in ResFile.SkeletalAnims)
+                    {
+                        skeletalAnims.Add(item.Value);
+                    }
+                    ResFile.SkeletalAnims.Clear();
+                    foreach (var item in skeletalAnims)
+                    {
+                        ResFile.SkeletalAnims.Add(item.Name, item);
+                    }
                 }
             }
 
@@ -191,17 +201,17 @@ namespace CafeLibrary
                 AddChild(BoneVisAnimsFolder);
         }
 
-        private void ReplaceAllSkeletalAnim()
+        private void ReplaceSkeletalAnim()
         {
-            ReplaceAllSkeletalAnim(false);
+            ReplaceSkeletalAnim(false);
         }
 
-        private void ReplaceAllSkeletalAnimBoneConfig()
+        private void ReplaceSkeletalAnimBoneConfig()
         {
-            ReplaceAllSkeletalAnim(true);
+            ReplaceSkeletalAnim(true);
         }
 
-        private void ReplaceAllSkeletalAnim(bool boneConfigOnly)
+        private void ReplaceSkeletalAnim(bool boneConfigOnly)
         {
             var dlg = new ImguiFileDialog();
             dlg.SaveDialog = false;
@@ -263,6 +273,20 @@ namespace CafeLibrary
                 ((BfresVisibilityAnim)anim.Tag).OnSave();
             foreach (var anim in SceneAnimsFolder.Children)
                 ((SceneAnimNode)anim).OnSave();
+
+            // Recreate skeletalAnims list
+            List<SkeletalAnim> skeletalAnims = new List<SkeletalAnim>();
+            foreach (var item in ResFile.SkeletalAnims)
+            {
+                skeletalAnims.Add(item.Value);
+            }
+            ResFile.SkeletalAnims.Clear();
+            foreach (var item in skeletalAnims)
+            {
+                ResFile.SkeletalAnims.Add(item.Name, item);
+            }
+
+            Reload();
         }
 
         public void Reload()
