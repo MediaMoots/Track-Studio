@@ -218,6 +218,9 @@ namespace CafeLibrary.Rendering
 
             if (filePath is not null || dlg.ShowDialog())
             {
+                string cachedAnimName = SkeletalAnim.Name;
+                bool cachedLoopFlag = SkeletalAnim.Loop;
+
                 string usedFilePath = filePath ?? dlg.FilePath;
                 string usedFileExt = Path.GetExtension(usedFilePath);
                 switch (usedFileExt)
@@ -314,6 +317,10 @@ namespace CafeLibrary.Rendering
                         SkeletalAnim.Import(usedFilePath, ResFile);
                         break;
                 }
+
+                SkeletalAnim.Name = cachedAnimName;
+                SkeletalAnim.Loop = cachedLoopFlag;
+
                 Reload(SkeletalAnim);
             }
         }

@@ -206,11 +206,6 @@ namespace CafeLibrary
             ReplaceSkeletalAnim(false);
         }
 
-        private void ReplaceSkeletalAnimBoneConfig()
-        {
-            ReplaceSkeletalAnim(true);
-        }
-
         private void ReplaceSkeletalAnim(bool boneConfigOnly)
         {
             var dlg = new ImguiFileDialog();
@@ -221,8 +216,8 @@ namespace CafeLibrary
             {
                 dlg.AddFilter(".bfska", ".bfska");
                 dlg.AddFilter(".anim", ".anim");
-                // dlg.AddFilter(".gltf", ".gltf");
-                // dlg.AddFilter(".glb", ".glb");
+                dlg.AddFilter(".gltf", ".gltf");
+                dlg.AddFilter(".glb", ".glb");
             }
             dlg.AddFilter(".json", ".json");
 
