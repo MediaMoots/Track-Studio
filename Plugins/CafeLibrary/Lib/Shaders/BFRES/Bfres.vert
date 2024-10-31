@@ -77,22 +77,22 @@ vec4 skin(vec3 pos)
     }
     else //Smooth
     {
-	    if (SKIN_COUNT >= 1) newPosition =  vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex.x]) * vBoneWeight.x;
-	    if (SKIN_COUNT >= 2) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex.y]) * vBoneWeight.y;
-	    if (SKIN_COUNT >= 3) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex.z]) * vBoneWeight.z;
-	    if (SKIN_COUNT >= 4 && vBoneWeight.w < 1) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex.w]) * vBoneWeight.w;
-	    if (SKIN_COUNT >= 5) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex2.x]) * vBoneWeight2.x;
-	    if (SKIN_COUNT >= 6) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex2.y]) * vBoneWeight2.y;
-	    if (SKIN_COUNT >= 7) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex2.z]) * vBoneWeight2.z;
-	    if (SKIN_COUNT >= 8 && vBoneWeight2.w < 1) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex2.w]) * vBoneWeight2.w;
-	    if (SKIN_COUNT >= 9) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex3.x]) * vBoneWeight3.x;
-	    if (SKIN_COUNT >= 10) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex3.y]) * vBoneWeight3.y;
-	    if (SKIN_COUNT >= 11) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex3.z]) * vBoneWeight3.z;
-	    if (SKIN_COUNT >= 12 && vBoneWeight3.w < 1) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex3.w]) * vBoneWeight3.w;
-	    if (SKIN_COUNT >= 13) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex4.x]) * vBoneWeight4.x;
-	    if (SKIN_COUNT >= 14) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex4.y]) * vBoneWeight4.y;
-	    if (SKIN_COUNT >= 15) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex4.z]) * vBoneWeight4.z;
-	    if (SKIN_COUNT >= 16 && vBoneWeight4.w < 1) newPosition += vec4(pos, 1.0) * mat4(cBoneMatrices[vBoneIndex4.w]) * vBoneWeight4.w;
+        if (SKIN_COUNT >= 1 && SkinCount >= 1) newPosition = cBoneMatrices[vBoneIndex.x] * vec4(pos, 1.0) * vBoneWeight.x;
+        if (SKIN_COUNT >= 2 && SkinCount >= 2) newPosition += cBoneMatrices[vBoneIndex.y] * vec4(pos, 1.0) * vBoneWeight.y;
+        if (SKIN_COUNT >= 3 && SkinCount >= 3) newPosition += cBoneMatrices[vBoneIndex.z] * vec4(pos, 1.0) * vBoneWeight.z;
+        if (SKIN_COUNT >= 4 && vBoneWeight.w < 1 && SkinCount >= 4) newPosition += cBoneMatrices[vBoneIndex.w] * vec4(pos, 1.0) * vBoneWeight.w;
+        if (SKIN_COUNT >= 5 && SkinCount >= 5) newPosition += cBoneMatrices[vBoneIndex2.x] * vec4(pos, 1.0) * vBoneWeight2.x;
+        if (SKIN_COUNT >= 6 && SkinCount >= 6) newPosition += cBoneMatrices[vBoneIndex2.y] * vec4(pos, 1.0) * vBoneWeight2.y;
+        if (SKIN_COUNT >= 7 && SkinCount >= 7) newPosition += cBoneMatrices[vBoneIndex2.z] * vec4(pos, 1.0) * vBoneWeight2.z;
+        if (SKIN_COUNT >= 8 && vBoneWeight2.w < 1 && SkinCount >= 8) newPosition += cBoneMatrices[vBoneIndex2.w] * vec4(pos, 1.0) * vBoneWeight2.w;
+        if (SKIN_COUNT >= 9 && SkinCount >= 8) newPosition += cBoneMatrices[vBoneIndex3.x] * vec4(pos, 1.0) * vBoneWeight3.x;
+        if (SKIN_COUNT >= 10 && SkinCount >= 8) newPosition += cBoneMatrices[vBoneIndex3.y] * vec4(pos, 1.0) * vBoneWeight3.y;
+        if (SKIN_COUNT >= 11 && SkinCount >= 8) newPosition += cBoneMatrices[vBoneIndex3.z] * vec4(pos, 1.0) * vBoneWeight3.z;
+        if (SKIN_COUNT >= 12 && vBoneWeight3.w < 1 && SkinCount >= 8) newPosition += cBoneMatrices[vBoneIndex3.w] * vec4(pos, 1.0) * vBoneWeight3.w;
+        if (SKIN_COUNT >= 13 && SkinCount >= 8) newPosition += cBoneMatrices[vBoneIndex4.x] * vec4(pos, 1.0) * vBoneWeight4.x;
+        if (SKIN_COUNT >= 14 && SkinCount >= 8) newPosition += cBoneMatrices[vBoneIndex4.y] * vec4(pos, 1.0) * vBoneWeight4.y;
+        if (SKIN_COUNT >= 15 && SkinCount >= 8) newPosition += cBoneMatrices[vBoneIndex4.z] * vec4(pos, 1.0) * vBoneWeight4.z;
+        if (SKIN_COUNT >= 16 && vBoneWeight4.w < 1 && SkinCount >= 8) newPosition += cBoneMatrices[vBoneIndex4.w] * vec4(pos, 1.0) * vBoneWeight4.w;
     }
 
     return newPosition;
