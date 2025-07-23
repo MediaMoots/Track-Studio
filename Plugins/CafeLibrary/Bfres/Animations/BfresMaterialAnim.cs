@@ -229,7 +229,7 @@ namespace CafeLibrary.Rendering
             var dlg = new ImguiFileDialog();
             dlg.FileName = $"{MaterialAnim.Name}.bfmaa";
             dlg.AddFilter(".bfmaa", ".bfmaa");
-          //  dlg.AddFilter(".json", ".json");
+            dlg.AddFilter(".json", ".json");
 
             if (dlg.ShowDialog())
             {
