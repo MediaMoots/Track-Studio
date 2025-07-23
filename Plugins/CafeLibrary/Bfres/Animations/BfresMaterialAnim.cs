@@ -234,6 +234,8 @@ namespace CafeLibrary.Rendering
             if (dlg.ShowDialog())
             {
                 MaterialAnim.Import(dlg.FilePath, ResFile);
+                MaterialAnim.Name = this.Name;
+
                 Reload(MaterialAnim);
             }
         }

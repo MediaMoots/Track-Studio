@@ -288,9 +288,15 @@ namespace TurboLibrary.MuuntEditor
             var translation = ParentPoint.Transform.Position + Transform.Position;
             Transform.SetCustomOrigin(translation);
 
-            ParentPoint.Transform.TransformUpdated += delegate
+            ParentPoint.Transform.CustomRotationActionCallback += (sender, e) =>
             {
+                var arguments = (GLTransform.CustomRotationArgs)sender;
+                ParentPoint.Transform.Rotation = arguments.Rotation;
+                ParentPoint.Transform.UpdateMatrix(true);
 
+                // Apply to return points
+                this.Transform.Rotation = arguments.Rotation;
+                this.Transform.UpdateMatrix(true);
             };
 
             Transform.EnableCollisionDrop = false;
@@ -298,7 +304,7 @@ namespace TurboLibrary.MuuntEditor
             Transform.CustomScaleActionCallback += (sender, e) =>
             {
                 Transform.UpdateMatrix(true);
-            };
+            }; 
         }
 
         public void DrawColorPicking(GLContext context)
@@ -351,7 +357,7 @@ namespace TurboLibrary.MuuntEditor
 
             //Local to world space, relative from the point it is parented to
             var translation = ParentPoint.Transform.Position + Transform.Position;
-            var rotation = ParentPoint.Transform.Rotation * Transform.Rotation;
+            var rotation =  Transform.Rotation;
 
             Transform.SetCustomOrigin(translation);
 
