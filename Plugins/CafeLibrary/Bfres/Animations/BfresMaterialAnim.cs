@@ -256,6 +256,8 @@ namespace CafeLibrary.Rendering
                 ResFile.ColorAnims.Remove(this.MaterialAnim);
             if (ResFile.TexPatternAnims.ContainsValue(this.MaterialAnim))
                 ResFile.TexPatternAnims.Remove(this.MaterialAnim);
+            if (ResFile.MatVisibilityAnims.ContainsValue(this.MaterialAnim))
+                ResFile.MatVisibilityAnims.Remove(this.MaterialAnim);
         }
 
         public BfresMaterialAnim Clone() {

@@ -24,6 +24,7 @@ namespace CafeLibrary
         private readonly NodeBase TexSRTParamAnimsFolder = new NodeBase("Texture SRT Animations");
         private readonly NodeBase TexPatternAnimsFolder = new NodeBase("Texture Pattern Animations");
         private readonly NodeBase BoneVisAnimsFolder = new NodeBase("Bone Visibility Animations");
+        private readonly NodeBase MatVisibilityAnimsFolder = new NodeBase("Mat Visibility Animations");
         private readonly SceneAnimFolder SceneAnimsFolder = new SceneAnimFolder();
 
         private BFRES BfresWrapper;
@@ -38,7 +39,8 @@ namespace CafeLibrary
             ContextMenus.Add(new MenuItemModel("New Shader Param Animation", AddShaderParamAnim));
             ContextMenus.Add(new MenuItemModel("New Tex SRT Animation", AddTexSRTAnim));
             ContextMenus.Add(new MenuItemModel("New Color Animation", AddColorAnim));
-            ContextMenus.Add(new MenuItemModel("New Bone Vis Animation", AddVisAnimation));
+            ContextMenus.Add(new MenuItemModel("New Bone Vis Animation", AddBoneVisAnimation));
+            ContextMenus.Add(new MenuItemModel("New Mat Visibility Animation", AddMatVisibilityAnimation));
             ContextMenus.Add(new MenuItemModel("New Scene Animation", AddSceneAnimation));
 
             SkeletalAnimsFolder.ContextMenus.Add(new MenuItemModel("Import", ImportSkeletalAnim));
@@ -51,6 +53,7 @@ namespace CafeLibrary
 
             TexPatternAnimsFolder.ContextMenus.Add(new MenuItemModel("New Texture Pattern Animation", AddTextureAnim));
             ShaderParamAnimsFolder.ContextMenus.Add(new MenuItemModel("New Shader Param Animation", AddShaderParamAnim));
+            MatVisibilityAnimsFolder.ContextMenus.Add(new MenuItemModel("New Material Visibility Animation", AddMatVisibilityAnimation));
             TexSRTParamAnimsFolder.ContextMenus.Add(new MenuItemModel("New Tex SRT Animation", AddTexSRTAnim));
             ColorParamAnimsFolder.ContextMenus.Add(new MenuItemModel("New Color Animation", AddColorAnim));
 
@@ -189,7 +192,7 @@ namespace CafeLibrary
             Reload();
         }
 
-        private void AddVisAnimation()
+        private void AddBoneVisAnimation()
         {
             var anim = new VisibilityAnim() { Name = "VisibilityAnim" };
             anim.Name = Utils.RenameDuplicateString(anim.Name, ResFile.BoneVisibilityAnims.Keys.Select(x => x).ToList());
@@ -199,6 +202,18 @@ namespace CafeLibrary
 
             if (BoneVisAnimsFolder.Parent == null) 
                 AddChild(BoneVisAnimsFolder);
+        }
+
+        private void AddMatVisibilityAnimation()
+        {
+            var anim = new MaterialAnim() { Name = "MaterialVisibilityAnim" };
+            anim.Name = Utils.RenameDuplicateString(anim.Name, ResFile.MatVisibilityAnims.Keys.Select(x => x).ToList());
+            ResFile.MatVisibilityAnims.Add(anim.Name, anim);
+
+            AddMatVisibilityAnimation(anim);
+
+            if (MatVisibilityAnimsFolder.Parent == null)
+                AddChild(MatVisibilityAnimsFolder);
         }
 
         private void ReplaceSkeletalAnim()
@@ -266,6 +281,8 @@ namespace CafeLibrary
                 ((BfresMaterialAnim)anim.Tag).OnSave();
             foreach (var anim in BoneVisAnimsFolder.Children)
                 ((BfresVisibilityAnim)anim.Tag).OnSave();
+            foreach (var anim in MatVisibilityAnimsFolder.Children)
+                ((BfresMaterialAnim)anim.Tag).OnSave();
             foreach (var anim in SceneAnimsFolder.Children)
                 ((SceneAnimNode)anim).OnSave();
 
@@ -292,6 +309,7 @@ namespace CafeLibrary
             ColorParamAnimsFolder.Children.Clear();
             TexSRTParamAnimsFolder.Children.Clear();
             TexPatternAnimsFolder.Children.Clear();
+            MatVisibilityAnimsFolder.Children.Clear();
 
             foreach (var anim in ResFile.SkeletalAnims.Values)
                 if (!SkeletalAnimsFolder.Children.Any(x => x.Tag == anim))
@@ -311,6 +329,9 @@ namespace CafeLibrary
             foreach (var anim in ResFile.BoneVisibilityAnims.Values)
                 if (!BoneVisAnimsFolder.Children.Any(x => x.Tag == anim))
                     AddVisAnimation(anim);
+            foreach (var anim in ResFile.MatVisibilityAnims.Values)
+                if (!MatVisibilityAnimsFolder.Children.Any(x => ((BfresMaterialAnim)x.Tag).MaterialAnim == anim))
+                    AddMatVisibilityAnimation(anim);
 
             SceneAnimsFolder.Load(ResFile);
 
@@ -321,6 +342,7 @@ namespace CafeLibrary
             if (TexPatternAnimsFolder.Children.Count > 0) AddChild(TexPatternAnimsFolder);
             if (SceneAnimsFolder.Children.Count > 0) AddChild(SceneAnimsFolder);
             if (BoneVisAnimsFolder.Children.Count > 0) AddChild(BoneVisAnimsFolder);
+            if (MatVisibilityAnimsFolder.Children.Count > 0) AddChild(MatVisibilityAnimsFolder);
         }
 
         private void AddColorAnimation(MaterialAnim anim)
@@ -363,6 +385,13 @@ namespace CafeLibrary
             var bvba = new BfresVisibilityAnim(ResFile, anim, BfresWrapper.Renderer.Name);
             BfresWrapper.Renderer.VisAnimations.Add(bvba);
             BoneVisAnimsFolder.AddChild(bvba.UINode);
+        }
+
+        private void AddMatVisibilityAnimation(MaterialAnim anim)
+        {
+            var fmaa = new BfresMaterialAnim(ResFile, ResFile.MatVisibilityAnims, anim, BfresWrapper.Renderer.Name);
+            BfresWrapper.Renderer.MaterialAnimations.Add(fmaa);
+            MatVisibilityAnimsFolder.AddChild(fmaa.UINode);
         }
 
         private void AddSceneAnimation(SceneAnim anim)

@@ -87,6 +87,8 @@ namespace CafeLibrary.Rendering
                 renderer.MaterialAnimations.Add(new BfresMaterialAnim(anim, renderer.Name));
             foreach (var anim in resFile.TexPatternAnims.Values)
                 renderer.MaterialAnimations.Add(new BfresMaterialAnim(anim, renderer.Name));
+            foreach (var anim in resFile.MatVisibilityAnims.Values)
+                renderer.MaterialAnimations.Add(new BfresMaterialAnim(anim, renderer.Name));
         }
 
         public static Dictionary<string, GenericRenderer.TextureView> GetTextures(System.IO.Stream stream)
@@ -127,6 +129,8 @@ namespace CafeLibrary.Rendering
             foreach (var anim in resFile.TexSrtAnims.Values)
                 renderer.MaterialAnimations.Add(new BfresMaterialAnim(anim, renderer.Name));
             foreach (var anim in resFile.TexPatternAnims.Values)
+                renderer.MaterialAnimations.Add(new BfresMaterialAnim(anim, renderer.Name));
+            foreach (var anim in resFile.MatVisibilityAnims.Values)
                 renderer.MaterialAnimations.Add(new BfresMaterialAnim(anim, renderer.Name));
 
             if (renderer.Models.Count > 0)
