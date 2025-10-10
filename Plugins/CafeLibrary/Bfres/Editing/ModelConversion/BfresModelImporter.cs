@@ -1109,7 +1109,6 @@ namespace CafeLibrary.ModelConversion
                 Data = Positions.ToArray(),
                 Format = settings.Position.Format,
             });
-            attributes.Last().Flags |= VertexAttrib.VertexAttribFlags.ContainsDynamicVertexBuffer;
 
             if (Normals.Count > 0)
             {
@@ -1119,7 +1118,6 @@ namespace CafeLibrary.ModelConversion
                     Data = Normals.ToArray(),
                     Format = settings.Normal.Format,
                 });
-                attributes.Last().Flags |= VertexAttrib.VertexAttribFlags.ContainsDynamicVertexBuffer;
             }
 
             if (Tangents.Count > 0)
