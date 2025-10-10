@@ -326,7 +326,7 @@ namespace CafeLibrary.ModelConversion
                     meshIndex++;
                     continue;
                 }
-                    
+
 
                 mesh.TransformVertices(GlobalTransform);
 
@@ -339,7 +339,7 @@ namespace CafeLibrary.ModelConversion
                 }
 
                 // Skip invalid meshes
-                if (meshSettings == null || 
+                if (meshSettings == null ||
                     (importSettings.SkipMeshesWithInvalidMaterials && meshSettings.MaterialName == ""))
                 {
                     meshIndex++;
@@ -411,7 +411,7 @@ namespace CafeLibrary.ModelConversion
                     {
                         material = mat.Label;
                         break;
-                    } 
+                    }
                 }
 
                 int materialIndex = fmdl.Materials.IndexOf(material);
@@ -487,53 +487,68 @@ namespace CafeLibrary.ModelConversion
 
                 if (mesh.MorphTargets.Count > 0)
                 {
+                    // We morph position + normal
                     fshp.TargetAttribCount = 2;
 
+                    // Map attribute name -> absolute index in the vertex attribute array
                     var attrs = fmdl.VertexBuffers[fshp.VertexBufferIndex].Attributes;
                     var loc = new Dictionary<string, int>(StringComparer.Ordinal);
                     for (int a = 0; a < attrs.Count; a++)
                         loc[attrs[a].Name] = a;
 
-                    int locP0 = loc["_p0"];
-                    int locN0 = loc["_n0"];
+                    // Helper: return (index + 1) or 0 if attribute is absent.
+                    // ResKeyShape stores absolute indices + 1; 0 means "unused".
+                    byte AttrIndexOrZero(string name)
+                        => loc.TryGetValue(name, out int idx) ? (byte)(idx + 1) : (byte)0;
 
+                    // ------------------------------------------------------------------
+                    // 0) Base key shape (MUST be first): points to _p0 / _n0 (and others if you morph them).
+                    // This enables dynamic vertex attributes on the GPU for the shape anim system.
+                    // ------------------------------------------------------------------
+                    const string BaseKeyshapeName = "Basis"; // Any stable name, but use the same in your VertexShapeAnim infos.
+                    var baseKs = new KeyShape
+                    {
+                        TargetAttribIndices = new byte[20]
+                        {
+                            AttrIndexOrZero("_p0"),   // Position
+                            AttrIndexOrZero("_n0"),   // Normal
+                            0,0,0,0,                  // Tangents[4]
+                            0,0,0,0,                  // Binormals[4]
+                            0,0,0,0,0,0,0,0,          // Colors[8]
+                            0,0                       // Padding
+                        }
+                    };
+                    fshp.KeyShapes.Add(BaseKeyshapeName, baseKs);
+
+                    // ------------------------------------------------------------------
+                    // 1) One key shape per morph target: _p{k+1} / _n{k+1}
+                    // Names here must match the names you reference in VertexShapeAnim.KeyShapeAnimInfos.
+                    // ------------------------------------------------------------------
                     for (int k = 0; k < mesh.MorphTargets.Count; k++)
                     {
-                        string key = mesh.MorphTargets.Keys.ElementAt(k);
+                        string key = mesh.MorphTargets.Keys.ElementAt(k); // morph name
 
-                        string pk = $"_p{k + 1}";
-                        string nk = $"_n{k + 1}";
-
-                        byte posByte = 0xFF;
-                        byte nrmByte = 0xFF;
-
-                        if (loc.TryGetValue(pk, out int lpk))
+                        var ks = new KeyShape
                         {
-                            int d = lpk - locP0;
-                            if (d >= 0 && d <= 254) posByte = (byte)d; // else leave 0xFF
-                        }
-
-                        if (loc.TryGetValue(nk, out int lnk))
-                        {
-                            int d = lnk - locN0;
-                            if (d >= 0 && d <= 254) nrmByte = (byte)d;
-                        }
-
-                        // Build the 20-byte KeyShape array
-                        var targetAttribIndices = Enumerable.Repeat((byte)0xFF, 20).ToArray();
-                        targetAttribIndices[0] = posByte;   // relative to _p0
-                        targetAttribIndices[1] = nrmByte;   // relative to _n0
-                        targetAttribIndices[18] = 0x00;     // reserved
-                        targetAttribIndices[19] = 0x00;     // reserved
-
-                        var keyShape = new KeyShape
-                        {
-                            TargetAttribIndices = targetAttribIndices,
-                            TargetAttribIndexOffsets = new byte[4] { 0, 0, 0, 0 } // padding/unused
+                            TargetAttribIndices = new byte[20]
+                            {
+                                AttrIndexOrZero($"_p{k + 1}"), // Position for this morph
+                                AttrIndexOrZero($"_n{k + 1}"), // Normal   for this morph (leave 0 if you don't morph normals)
+                                0,0,0,0,                       // Tangents[4] (fill if you author them)
+                                0,0,0,0,                       // Binormals[4]
+                                0,0,0,0,0,0,0,0,               // Colors[8]
+                                0,0                            // Padding
+                            }
                         };
 
-                        fshp.KeyShapes.Add(key, keyShape);
+                        fshp.KeyShapes.Add(key, ks);
                     }
+
+                    // NOTE:
+                    // - DO NOT write 0xFF anywhere; 0 means "unused", nonzero is (absoluteIndex+1).
+                    // - On Switch, KeyShape must serialize exactly 20 bytes (no extra 4-byte tail).
+                    // - When you build the VertexShapeAnim, add a KeyShapeAnimInfo for the base first
+                    //   with curveIndex = -1, then one per morph in the same order as added above.
                 }
 
                 //Finally add the shape to the model
@@ -621,7 +636,7 @@ namespace CafeLibrary.ModelConversion
                 //Full bounding at the end
                 fshp.SubMeshBoundings.Add(boundingFull);
             }
-            else 
+            else
             {
                 //Single mesh
                 mesh.SubMeshes.Add(new SubMesh()
@@ -1094,6 +1109,7 @@ namespace CafeLibrary.ModelConversion
                 Data = Positions.ToArray(),
                 Format = settings.Position.Format,
             });
+            attributes.Last().Flags |= VertexAttrib.VertexAttribFlags.ContainsDynamicVertexBuffer;
 
             if (Normals.Count > 0)
             {
@@ -1103,6 +1119,7 @@ namespace CafeLibrary.ModelConversion
                     Data = Normals.ToArray(),
                     Format = settings.Normal.Format,
                 });
+                attributes.Last().Flags |= VertexAttrib.VertexAttribFlags.ContainsDynamicVertexBuffer;
             }
 
             if (Tangents.Count > 0)
