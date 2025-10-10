@@ -121,6 +121,7 @@ namespace CafeLibrary.ModelConversion
                 }
                 fmdl.Materials.Add(fmat.Name, fmat);
             }
+
             if (fmdl.Materials.Count == 0)
             {
                 Material fmat = new Material();
@@ -482,6 +483,57 @@ namespace CafeLibrary.ModelConversion
                 else if (importSettings.GlobalCustomDataSkinCount)
                 {
                     fshp.VertexSkinCount = (byte)importSettings.GlobalDataSkinCount;
+                }
+
+                if (mesh.MorphTargets.Count > 0)
+                {
+                    fshp.TargetAttribCount = 2;
+
+                    var attrs = fmdl.VertexBuffers[fshp.VertexBufferIndex].Attributes;
+                    var loc = new Dictionary<string, int>(StringComparer.Ordinal);
+                    for (int a = 0; a < attrs.Count; a++)
+                        loc[attrs[a].Name] = a;
+
+                    int locP0 = loc["_p0"];
+                    int locN0 = loc["_n0"];
+
+                    for (int k = 0; k < mesh.MorphTargets.Count; k++)
+                    {
+                        string key = mesh.MorphTargets.Keys.ElementAt(k);
+
+                        string pk = $"_p{k + 1}";
+                        string nk = $"_n{k + 1}";
+
+                        byte posByte = 0xFF;
+                        byte nrmByte = 0xFF;
+
+                        if (loc.TryGetValue(pk, out int lpk))
+                        {
+                            int d = lpk - locP0;
+                            if (d >= 0 && d <= 254) posByte = (byte)d; // else leave 0xFF
+                        }
+
+                        if (loc.TryGetValue(nk, out int lnk))
+                        {
+                            int d = lnk - locN0;
+                            if (d >= 0 && d <= 254) nrmByte = (byte)d;
+                        }
+
+                        // Build the 20-byte KeyShape array
+                        var targetAttribIndices = Enumerable.Repeat((byte)0xFF, 20).ToArray();
+                        targetAttribIndices[0] = posByte;   // relative to _p0
+                        targetAttribIndices[1] = nrmByte;   // relative to _n0
+                        targetAttribIndices[18] = 0x00;     // reserved
+                        targetAttribIndices[19] = 0x00;     // reserved
+
+                        var keyShape = new KeyShape
+                        {
+                            TargetAttribIndices = targetAttribIndices,
+                            TargetAttribIndexOffsets = new byte[4] { 0, 0, 0, 0 } // padding/unused
+                        };
+
+                        fshp.KeyShapes.Add(key, keyShape);
+                    }
                 }
 
                 //Finally add the shape to the model
@@ -1143,6 +1195,47 @@ namespace CafeLibrary.ModelConversion
                         Format = settings.BoneWeights.Format,
                     });
                 }
+            }
+
+            for (int i = 0; i < mesh.MorphTargets.Count; i++)
+            {
+                List<Vector4F> PositionsMorph = new List<Vector4F>();
+                List<Vector4F> NormalsMorph = new List<Vector4F>();
+
+                List<IOVertex> verticesMorph = mesh.MorphTargets.Values.ToList()[i];
+                for (int v = 0; v < verticesMorph.Count; v++)
+                {
+                    var vertex = verticesMorph[v];
+
+                    var position = new System.Numerics.Vector3(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
+                    var normal = new System.Numerics.Vector3(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
+                    var tangent = new System.Numerics.Vector3(vertex.Tangent.X, vertex.Tangent.Y, vertex.Tangent.Z);
+                    var binormal = new System.Numerics.Vector3(vertex.Binormal.X, vertex.Binormal.Y, vertex.Binormal.Z);
+
+                    PositionsMorph.Add(new Vector4F(
+                        position.X,
+                        position.Y,
+                        position.Z, 0));
+
+                    NormalsMorph.Add(new Vector4F(
+                        normal.X,
+                        normal.Y,
+                        normal.Z, 0));
+                }
+
+                attributes.Add(new VertexBufferHelperAttrib()
+                {
+                    Name = $"_p{i + 1}",
+                    Data = PositionsMorph.ToArray(),
+                    Format = settings.Position.Format,
+                });
+
+                attributes.Add(new VertexBufferHelperAttrib()
+                {
+                    Name = $"_n{i + 1}",
+                    Data = NormalsMorph.ToArray(),
+                    Format = settings.Normal.Format,
+                });
             }
 
             //Ensure all attributes from the current layout exist to use

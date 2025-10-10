@@ -14,7 +14,7 @@ using Toolbox.Core.ViewModels;
 using UIFramework;
 using MapStudio.UI;
 
-namespace CafeLibrary
+namespace CafeLibrary.Rendering
 {
     public class BfresVisibilityAnim : STAnimation, IEditableAnimation, IContextMenu
     {
