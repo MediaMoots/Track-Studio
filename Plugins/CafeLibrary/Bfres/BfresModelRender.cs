@@ -380,7 +380,7 @@ namespace CafeLibrary.Rendering
             GL.Uniform1(GL.GetUniformLocation(programID, "UseSkinning"), 1);
 
             GsysSkeleton gsysSkeletonBuffer = new GsysSkeleton();
-            gsysSkeletonBuffer.cBoneMatrices = new Matrix4[1300];
+            gsysSkeletonBuffer.cBoneMatrices = new Matrix4[1365];
 
             for (int i = 0; i < skeleton.Bones.Count; i++)
             {

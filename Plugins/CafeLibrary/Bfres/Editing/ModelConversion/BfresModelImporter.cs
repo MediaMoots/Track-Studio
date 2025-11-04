@@ -1220,22 +1220,36 @@ namespace CafeLibrary.ModelConversion
                 List<IOVertex> verticesMorph = mesh.MorphTargets.Values.ToList()[i];
                 for (int v = 0; v < verticesMorph.Count; v++)
                 {
-                    var vertex = verticesMorph[v];
+                    var vertex = vertices[v];
+                    var vertexMorph = verticesMorph[v];
 
                     var position = new System.Numerics.Vector3(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
                     var normal = new System.Numerics.Vector3(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
-                    var tangent = new System.Numerics.Vector3(vertex.Tangent.X, vertex.Tangent.Y, vertex.Tangent.Z);
-                    var binormal = new System.Numerics.Vector3(vertex.Binormal.X, vertex.Binormal.Y, vertex.Binormal.Z);
 
-                    PositionsMorph.Add(new Vector4F(
-                        position.X,
-                        position.Y,
-                        position.Z, 0));
+                    var positionMorph = new System.Numerics.Vector3(vertexMorph.Position.X, vertexMorph.Position.Y, vertexMorph.Position.Z) + position;
+                    var normalMorph = new System.Numerics.Vector3(vertexMorph.Normal.X, vertexMorph.Normal.Y, vertexMorph.Normal.Z) + normal;
 
-                    NormalsMorph.Add(new Vector4F(
-                        normal.X,
-                        normal.Y,
-                        normal.Z, 0));
+                    //Reset rigid skinning types to local space
+                    if (fshp.VertexSkinCount == 0 && boneMatrices.Length > 0)
+                    {
+                        var transform = boneMatrices[fshp.BoneIndex];
+                        positionMorph = System.Numerics.Vector3.Transform(positionMorph, transform);
+                        normalMorph = System.Numerics.Vector3.TransformNormal(normalMorph, transform);
+                    }
+                    //Reset rigid skinning types to local space
+                    if (fshp.VertexSkinCount == 1 && vertices[v].Envelope.Weights.Count > 0)
+                    {
+                        int index = Array.FindIndex(fskl.Bones.Values.ToArray(), x => x.Name == vertices[v].Envelope.Weights[0].BoneName);
+                        if (index != -1)
+                        {
+                            var transform = boneMatrices[index];
+                            positionMorph = System.Numerics.Vector3.Transform(positionMorph, transform);
+                            normalMorph = System.Numerics.Vector3.TransformNormal(normalMorph, transform);
+                        }
+                    }
+
+                    PositionsMorph.Add(new Vector4F(positionMorph.X, positionMorph.Y, positionMorph.Z, 0));
+                    NormalsMorph.Add(new Vector4F(normalMorph.X, normalMorph.Y, normalMorph.Z, 0));
                 }
 
                 attributes.Add(new VertexBufferHelperAttrib()
