@@ -138,6 +138,8 @@ VIEW - View
 BACK_TO_PREVIOUS - Back To Previous
 FULL_SCREEN - Full Screen
 
+TOOLS - Tools
+
 PATHS - Paths
 GAME_CONFIG - Game Config
 SETTINGS - Settings
