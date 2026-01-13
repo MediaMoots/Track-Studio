@@ -440,6 +440,8 @@ namespace CafeLibrary
 
             ImGui.Checkbox($"Enable Sub Meshes (Experimental)", ref Settings.EnableSubMesh);
 
+            ImGui.Checkbox($"Use Bone Info Weights", ref Settings.UseBoneInfoWeight);
+
             ImGui.EndColumns();
         }
 

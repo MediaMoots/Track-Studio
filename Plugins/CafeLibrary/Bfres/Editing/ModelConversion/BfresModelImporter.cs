@@ -484,6 +484,49 @@ namespace CafeLibrary.ModelConversion
                 {
                     fshp.VertexSkinCount = (byte)importSettings.GlobalDataSkinCount;
                 }
+                else if (importSettings.UseBoneInfoWeight)
+                {
+                    // Use the first vertex's first weight bone as the rigid bind bone.
+                    // Be defensive: meshes may be empty, envelopes/weights may be null,
+                    // the bone may not exist, or IndexOf may return -1.
+                    fshp.VertexSkinCount = 0;
+
+                    int bonesCount = 0;
+                    if (model.Skeleton != null)
+                    {
+                        // IOSkeleton doesn't expose Count; use known bone collections.
+                        bonesCount = model.Skeleton.RootBones?.Count ?? 0;
+                        if (bonesCount == 0)
+                            bonesCount = model.Skeleton.BreathFirstOrder()?.Count ?? 0;
+                    }
+
+                    var firstVertex = mesh.Vertices.FirstOrDefault();
+                    var firstWeight = firstVertex?.Envelope?.Weights?.FirstOrDefault();
+                    var boneName = firstWeight?.BoneName;
+
+                    if (!string.IsNullOrWhiteSpace(boneName) && model.Skeleton != null)
+                    {
+                        var bone = model.Skeleton.GetBoneByName(boneName);
+                        int boneIndex = bone != null ? model.Skeleton.IndexOf(bone) : -1;
+
+                        if (boneIndex >= 0)
+                        {
+                            fshp.BoneIndex = (ushort)boneIndex;
+                        }
+                        else
+                        {
+                            // Fallback: keep existing BoneIndex (from meshSettings) if it is valid; otherwise, default to 0.
+                            if (bonesCount > 0 && fshp.BoneIndex >= bonesCount)
+                                fshp.BoneIndex = 0;
+                        }
+                    }
+                    else
+                    {
+                        // No weights to read a bone from. Keep existing BoneIndex if possible.
+                        if (bonesCount > 0 && fshp.BoneIndex >= bonesCount)
+                            fshp.BoneIndex = 0;
+                    }
+                }
 
                 if (mesh.MorphTargets.Count > 0)
                 {

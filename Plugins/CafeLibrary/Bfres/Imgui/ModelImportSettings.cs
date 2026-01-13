@@ -45,6 +45,8 @@ namespace CafeLibrary
         public bool GlobalCustomDataSkinCount = false;
         public int GlobalDataSkinCount = 16;
 
+        public bool UseBoneInfoWeight = false;
+
         public int LODCount = 2;
 
         public Vector4 ColorOverride = Vector4.One;
