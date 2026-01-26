@@ -11,6 +11,7 @@ using System.IO;
 using Toolbox.Core;
 using GLFrameworkEngine;
 using ImGuiNET;
+using TrackStudio.Tools;
 
 namespace TrackStudio
 {
@@ -100,6 +101,10 @@ namespace TrackStudio
                 LoadFileFormat(file);
 
             PluginSettingsUI = Toolbox.Core.FileManager.GetPluginSettings();
+
+            // Initialize tool system
+            MaterialReplacerTool.GetWorkspaces = () => Workspaces;
+            ToolManager.InitializeDefaultTools();
         }
 
         public override void Render()
@@ -374,79 +379,8 @@ namespace TrackStudio
 
         private void LoadToolMenu()
         {
-            if (!ImGui.MenuItem(TranslationSource.GetText("Material Replacer")))
-                return;
-
-            var dlg = new ImguiFolderDialog { Title = "Pick Folder" };
-            if (!dlg.ShowDialog())
-                return;
-
-            string[] materialNames = System.Array.Empty<string>();
-
-            var root = dlg.SelectedPath;
-
-            // Cache materials list from text file
-            var materialsListPath = Path.Combine(root, "Materials.txt");
-            if (!File.Exists(materialsListPath))
-                materialsListPath = Path.Combine(root, "Materials");
-
-            if (File.Exists(materialsListPath))
-            {
-                materialNames = File.ReadAllLines(materialsListPath)
-                    .Select(l => l.Trim())
-                    .Where(l => !string.IsNullOrEmpty(l))
-                    .ToArray();
-            }
-            else
-            {
-                materialNames = System.Array.Empty<string>();
-            }
-
-            var lookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var dir in Directory.GetDirectories(root))
-            {
-                var name = Path.GetFileName(dir);
-                if (string.IsNullOrEmpty(name))
-                    continue;
-
-                var idx = name.IndexOfAny(new[] { ' ', '(' });
-                var key = idx > 0 ? name[..idx] : name;
-
-                var materials = Path.Combine(dir, "Materials");
-                if (Directory.Exists(materials))
-                    lookup[key] = materials;
-            }
-
-            foreach (var ws in Workspaces)
-            {
-                if (ws.ActiveEditor is not CafeLibrary.BFRES bfres)
-                {
-                    continue;
-                }
-
-                var wsName = ws.Name;
-                if (string.IsNullOrEmpty(wsName))
-                    continue;
-
-                var dot = wsName.IndexOf('.');
-                var key = dot > 0 ? wsName[..dot] : wsName;
-
-                if (lookup.TryGetValue(key, out var path))
-                {
-                    foreach (var materialName in materialNames)
-                    {
-                        if (!bfres.ResFile.Models[0].Materials.ContainsKey(materialName))
-                            continue;
-
-                        var materialJsonFile = Path.Combine(path, materialName + ".json");
-                        if (!File.Exists(materialJsonFile))
-                            continue;
-
-                        bfres.ResFile.Models[0].Materials[materialName].Import(materialJsonFile, bfres.ResFile);
-                    }
-                }
-            }
+            // Use the modular tool system
+            ToolManager.RenderToolMenu();
         }
 
         private void LoadEditMenu()
