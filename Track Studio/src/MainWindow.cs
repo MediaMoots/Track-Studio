@@ -12,6 +12,7 @@ using Toolbox.Core;
 using GLFrameworkEngine;
 using ImGuiNET;
 using TrackStudio.Tools;
+using TrackStudio.src.Tools.Animation;
 
 namespace TrackStudio
 {
@@ -104,6 +105,8 @@ namespace TrackStudio
 
             // Initialize tool system
             MaterialReplacerTool.GetWorkspaces = () => Workspaces;
+            AnimationBulkExporter.GetWorkspaces = () => Workspaces;
+            AnimationBulkImporter.GetWorkspaces = () => Workspaces;
             ToolManager.InitializeDefaultTools();
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
 using MapStudio.UI;
+using TrackStudio.src.Tools.Animation;
 
 namespace TrackStudio.Tools
 {
@@ -66,8 +67,10 @@ namespace TrackStudio.Tools
         {
             // Register all default tools here
             Register(new MaterialReplacerTool());
-            Register(new BoneOptimizerTool());
-            Register(new VertexFormatOptimizerTool());
+            //Register(new BoneOptimizerTool());
+            //Register(new VertexFormatOptimizerTool());
+            Register(new AnimationBulkExporter());
+            Register(new AnimationBulkImporter());
         }
 
         /// <summary>
