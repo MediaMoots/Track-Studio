@@ -570,7 +570,7 @@ namespace CafeLibrary.Rendering
                     group.Rotate.X.KeyFrames.Add(new STKeyFrame(0, boneAnim.BaseData.Rotate.X));
                     group.Rotate.Y.KeyFrames.Add(new STKeyFrame(0, boneAnim.BaseData.Rotate.Y));
                     group.Rotate.Z.KeyFrames.Add(new STKeyFrame(0, boneAnim.BaseData.Rotate.Z));
-                    group.Rotate.W.KeyFrames.Add(new STKeyFrame(0, boneAnim.BaseData.Rotate.Z));
+                    group.Rotate.W.KeyFrames.Add(new STKeyFrame(0, boneAnim.BaseData.Rotate.W));
                 }
                 if (boneAnim.FlagsBase.HasFlag(BoneAnimFlagsBase.Scale))
                 {
@@ -683,7 +683,7 @@ namespace CafeLibrary.Rendering
                         OpenTK.Vector3 rotationEuluer = bone.EulerRotation;
                         if (boneAnim.Rotate.X.HasKeys)
                             rotationEuluer.X = boneAnim.Rotate.X.GetFrameValue(Frame);
-                        if (boneAnim.Rotate.X.HasKeys)
+                        if (boneAnim.Rotate.Y.HasKeys)
                             rotationEuluer.Y = boneAnim.Rotate.Y.GetFrameValue(Frame);
                         if (boneAnim.Rotate.Z.HasKeys)
                             rotationEuluer.Z = boneAnim.Rotate.Z.GetFrameValue(Frame);
@@ -768,6 +768,7 @@ namespace CafeLibrary.Rendering
                 tracks.Add(X);
                 tracks.Add(Y);
                 tracks.Add(Z);
+                tracks.Add(W);
                 return tracks;
             }
         }
