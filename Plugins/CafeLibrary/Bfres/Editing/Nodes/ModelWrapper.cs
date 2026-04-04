@@ -2812,7 +2812,7 @@ namespace CafeLibrary
                             tan.X, tan.Y, tan.Z, vertex.Tangent.W);
                         break;
                     case "_b0":
-                        var btan = GetLocalVertexNormal(v, vertex.Tangent.Xyz);
+                        var btan = GetLocalVertexNormal(v, vertex.Bitangent.Xyz);
                         data[v] = new Syroot.Maths.Vector4F(
                             btan.X, btan.Y, btan.Z, vertex.Bitangent.W);
                         break;
